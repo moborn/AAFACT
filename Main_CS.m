@@ -85,7 +85,8 @@ for m = 1:length(all_files)
     % If the folder and the file don't have the bone name, the user must select
     % the bone name
     if exist('bone_indx','var') == 0
-        [bone_indx,~] = listdlg('PromptString', [{strcat('Select which bone this file is:'," ",string(FileName))} {''}], 'ListString', list_bone,'SelectionMode','single');
+        bone_indx = 2; %%this fixes it as calcaneus, without prompting
+        %[bone_indx,~] = listdlg('PromptString', [{strcat('Select which bone this file is:'," ",string(FileName))} {''}], 'ListString', list_bone,'SelectionMode','single');
     end
 
     % Looks through the folder name for the bone side
@@ -112,7 +113,8 @@ for m = 1:length(all_files)
     elseif exist('side_folder_indx','var') && side_folder_indx >= 4
         side_indx = 2;
     else
-        [side_indx,~] = listdlg('PromptString', [{strcat('Select which side this file is:'," ",string(FileName))} {''}], 'ListString', list_side,'SelectionMode','single');
+        side_indx = 2; %% this fixes it as left, without prompting
+        %[side_indx,~] = listdlg('PromptString', [{strcat('Select which side this file is:'," ",string(FileName))} {''}], 'ListString', list_side,'SelectionMode','single');
     end
 
     %% Load in file based on file type
@@ -130,6 +132,7 @@ for m = 1:length(all_files)
     elseif ext == ".ply"
         ptCloud = pcread(strcat(FolderPathName,'\',FileName));
         nodes = ptCloud.Location;
+        conlist = [];
     elseif ext == ".obj"
         obj = readObj(strcat(FolderPathName,'\',FileName));
         nodes = obj.v;
@@ -138,7 +141,7 @@ for m = 1:length(all_files)
         disp('This is not an acceptable file type at this time, please choose either a ".k", ".stl", ".vtk", ".obj", ".ply" or ".particles" file type.')
         return
     end
-
+    
     nodes_original = nodes;
     conlist_original = conlist;
 
@@ -150,8 +153,10 @@ for m = 1:length(all_files)
         [bone_coord,~] = listdlg('PromptString', {'Select which talar CS.'}, 'ListString', list_talus,'SelectionMode','multiple');
         cs_string = string(list_talus(bone_coord));
     elseif bone_indx == 2
-        [bone_coord,~] = listdlg('PromptString', {'Select which calcaneus CS.'}, 'ListString', list_calcaneus,'SelectionMode','multiple');
-        cs_string = string(list_calcaneus(bone_coord));
+        %[bone_coord,~] = listdlg('PromptString', {'Select which calcaneus CS.'}, 'ListString', list_calcaneus,'SelectionMode','multiple');
+        %cs_string = string(list_calcaneus(bone_coord));
+        bone_coord = [1,2];
+        cs_string = string(list_calcaneus);
     else
         bone_coord = 1;
         cs_string = "";
@@ -188,8 +193,8 @@ for m = 1:length(all_files)
             list_joint = {'Center','Talofibular Surface'};
         end
 
-        [joint_indx,~] = listdlg('PromptString', [{strcat('Where do you want the origin?'," ",cs_string(n))} {''}], 'ListString', list_joint,'SelectionMode','single');
-        % joint_indx = 1;
+        %[joint_indx,~] = listdlg('PromptString', [{strcat('Where do you want the origin?'," ",cs_string(n))} {''}], 'ListString', list_joint,'SelectionMode','single');
+        joint_indx = 1; %% this sets origin as centre
 
         if (bone_indx == 13 || bone_indx == 14) && length(joint_indx) > 1
             bone_coord = 1:2;
