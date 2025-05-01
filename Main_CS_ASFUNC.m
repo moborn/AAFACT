@@ -1,5 +1,7 @@
+function Main_CS_ASFUNC(mesh_list, bone, side, folder_name, plot)
+
 %% Main Script for Coordinate System Toolbox
-clear, clc, close all
+% clear, clc, close all
 
 % This main code only requires the users bone model input. Select the
 % folder where the file is and then select the bone model(s) you wish the
@@ -19,21 +21,23 @@ clear, clc, close all
 % group_#_bone_laterality.stl (ex. ABC_01_Tibia_Right.stl)
 
 % Determine the files in the folder selected
-FolderPathName = uigetdir('*.*', 'Select folder with your bones');
-files = dir(fullfile(FolderPathName, '*.*'));
-files = files(~ismember({files.name},{'.','..'}));
+% FolderPathName = uigetdir('*.*', 'Select folder with your bones');
+% files = dir(fullfile(FolderPathName, '*.*'));
+% files = files(~ismember({files.name},{'.','..'}));
+% 
+% temp = strfind(FolderPathName,'\');
+% FolderName = FolderPathName(temp(end)+1:end); % Extracts the folder name selected
 
-temp = strfind(FolderPathName,'\');
-FolderName = FolderPathName(temp(end)+1:end); % Extracts the folder name selected
-
-%% Load all files into list
-temp = struct2cell(files);
-list_files = temp(1,:);
+% %% Load all files into list
+% temp = struct2cell(files);
+% list_files = temp(1,:);
 
 % Select the models that you want a coordinate system of
-[files_indx,~] = listdlg('PromptString',{'Select your bone files'}, 'ListString', list_files, 'SelectionMode','multiple');
+% [files_indx,~] = listdlg('PromptString',{'Select your bone files'}, 'ListString', list_files, 'SelectionMode','multiple');
 
-all_files = list_files(files_indx)'; % stores all files selected
+all_files = mesh_list; % stores all files selected
+FolderPathName = folder_name;
+
 
 % Lists for detemining bone and side
 list_bone = {'Talus', 'Calcaneus', 'Navicular', 'Cuboid', 'Medial_Cuneiform','Intermediate_Cuneiform',...
@@ -56,55 +60,57 @@ for m = 1:length(all_files)
     name_original = name;
 
     % Looks through the folder name for the bone name
-    for n = 1:length(list_bone)
-        if any(string(extract(lower(FolderName),lower(list_bone(n)))) == lower(string(list_bone(n)))) ||...
-                any(string(extract(lower(FolderName),lower(list_bone2(n)))) == lower(string(list_bone2(n))))
-            if exist('bone_indx','var') == 0
-                bone_indx = n;
-            else
-                clear bone_indx
-            end
-        end
-    end
+    % for n = 1:length(list_bone)
+    %     if any(string(extract(lower(FolderName),lower(list_bone(n)))) == lower(string(list_bone(n)))) ||...
+    %             any(string(extract(lower(FolderName),lower(list_bone2(n)))) == lower(string(list_bone2(n))))
+    %         if exist('bone_indx','var') == 0
+    %             bone_indx = n;
+    %         else
+    %             clear bone_indx
+    %         end
+    %     end
+    % end
 
     % If the folder doesn't have the bone name, this looks through the file
     % name for the bone name
-    if exist('bone_indx','var') == 0
-        for n = 1:length(list_bone)
-            if any(string(extract(lower(FileName),lower(list_bone(n)))) == lower(string(list_bone(n)))) ||...
-                any(string(extract(lower(FileName),lower(list_bone2(n)))) == lower(string(list_bone2(n))))
-                if exist('bone_indx','var') == 0
-                    bone_indx = n;
-                else
-                    clear bone_indx
-                end
-            end
-        end
-    end
+    % if exist('bone_indx','var') == 0
+    %     for n = 1:length(list_bone)
+    %         if any(string(extract(lower(FileName),lower(list_bone(n)))) == lower(string(list_bone(n)))) ||...
+    %             any(string(extract(lower(FileName),lower(list_bone2(n)))) == lower(string(list_bone2(n))))
+    %             if exist('bone_indx','var') == 0
+    %                 bone_indx = n;
+    %             else
+    %                 clear bone_indx
+    %             end
+    %         end
+    %     end
+    % end
 
     % If the folder and the file don't have the bone name, the user must select
     % the bone name
     if exist('bone_indx','var') == 0
-        bone_indx = 2; %%this fixes it as calcaneus, without prompting
-        %[bone_indx,~] = listdlg('PromptString', [{strcat('Select which bone this file is:'," ",string(FileName))} {''}], 'ListString', list_bone,'SelectionMode','single');
+        % bone_indx = 2; %%this fixes it as calcaneus, without prompting
+        % [bone_indx,~] = listdlg('PromptString', [{strcat('Select which bone this file is:'," ",string(FileName))} {''}], 'ListString', list_bone,'SelectionMode','single');
+        bone_indx = find(strcmp(list_bone, bone));
+    
     end
-
-    % Looks through the folder name for the bone side
-    for n = 1:length(list_side_folder)
-        if any(string(extract(lower(FolderName),lower(list_side_folder(n)))) == lower(string(list_side_folder(n))))
-                side_folder_indx = n;
-        end
-    end
+    % 
+    % % Looks through the folder name for the bone side
+    % for n = 1:length(list_side_folder)
+    %     if any(string(extract(lower(FolderName),lower(list_side_folder(n)))) == lower(string(list_side_folder(n))))
+    %             side_folder_indx = n;
+    %     end
+    % end
 
     % If the folder doesn't have the bone side, this looks through the file
     % name for the bone side
-    if exist('side_folder_indx','var') == 0
-        for n = 1:length(list_side_folder)
-            if any(string(extract(lower(FileName),lower(list_side_folder(n)))) == lower(string(list_side_folder(n))))
-                side_folder_indx = n;
-            end
-        end
-    end
+    % if exist('side_folder_indx','var') == 0
+    %     for n = 1:length(list_side_folder)
+    %         if any(string(extract(lower(FileName),lower(list_side_folder(n)))) == lower(string(list_side_folder(n))))
+    %             side_folder_indx = n;
+    %         end
+    %     end
+    % end
 
     % If the folder and the file don't have the bone side, the user must select
     % the bone side
@@ -113,8 +119,9 @@ for m = 1:length(all_files)
     elseif exist('side_folder_indx','var') && side_folder_indx >= 4
         side_indx = 2;
     else
-        side_indx = 2; %% this fixes it as left, without prompting
+        % side_indx = 2; %% this fixes it as left, without prompting
         %[side_indx,~] = listdlg('PromptString', [{strcat('Select which side this file is:'," ",string(FileName))} {''}], 'ListString', list_side,'SelectionMode','single');
+        side_indx = find(strcmp(list_side, side));
     end
 
     %% Load in file based on file type
@@ -150,8 +157,10 @@ for m = 1:length(all_files)
     list_calcaneus = {'Calcaneocuboid CS','Subtalar CS'};
 
     if bone_indx == 1
-        [bone_coord,~] = listdlg('PromptString', {'Select which talar CS.'}, 'ListString', list_talus,'SelectionMode','multiple');
-        cs_string = string(list_talus(bone_coord));
+        % [bone_coord,~] = listdlg('PromptString', {'Select which talar CS.'}, 'ListString', list_talus,'SelectionMode','multiple');
+        % cs_string = string(list_talus(bone_coord));
+        bone_coord = [1,2,3];
+        cs_string = string(list_talus);
     elseif bone_indx == 2
         %[bone_coord,~] = listdlg('PromptString', {'Select which calcaneus CS.'}, 'ListString', list_calcaneus,'SelectionMode','multiple');
         %cs_string = string(list_calcaneus(bone_coord));
@@ -266,49 +275,49 @@ for m = 1:length(all_files)
             fprintf(strcat('The Coordinate System may be DIFFERENT than existing data, double check figure\n'))
             
         end
-
-        %% Final Plotting
-        screen_size = get(0, 'ScreenSize');
-        fig_width = 800;
-        fig_height = 600;
-        fig_left = (screen_size(3) - fig_width) / 2;
-        fig_bottom = (screen_size(4) - fig_height) / 2;
-
-        fig1 = figure('Position', [fig_left, fig_bottom+15, fig_width, fig_height]);
-        if ext == ".stl"
-            Final_Bone = triangulation(conlist,nodes_original);
-            patch('Faces',Final_Bone.ConnectivityList,'Vertices',Final_Bone.Points,...
-                'FaceColor', [0.85 0.85 0.85], ...
-                'EdgeColor','none',...
-                'FaceLighting','gouraud',...
-                'AmbientStrength', 0.15);
-            view([-15 20])
-            camlight HEADLIGHT
-            material('dull');
-        else
-            plot3(nodes_original(:,1),nodes_original(:,2),nodes_original(:,3),'k.')
-            view([-15 20])
+        if plot == 1
+            %% Final Plotting
+            screen_size = get(0, 'ScreenSize');
+            fig_width = 800;
+            fig_height = 600;
+            fig_left = (screen_size(3) - fig_width) / 2;
+            fig_bottom = (screen_size(4) - fig_height) / 2;
+    
+            fig1 = figure('Position', [fig_left, fig_bottom+15, fig_width, fig_height]);
+            if ext == ".stl"
+                Final_Bone = triangulation(conlist,nodes_original);
+                patch('Faces',Final_Bone.ConnectivityList,'Vertices',Final_Bone.Points,...
+                    'FaceColor', [0.85 0.85 0.85], ...
+                    'EdgeColor','none',...
+                    'FaceLighting','gouraud',...
+                    'AmbientStrength', 0.15);
+                view([-15 20])
+                camlight HEADLIGHT
+                material('dull');
+            else
+                plot3(nodes_original(:,1),nodes_original(:,2),nodes_original(:,3),'k.')
+                view([-15 20])
+            end
+            hold on
+            arrow(coords_final(1,:),coords_final(2,:),'FaceColor','g','EdgeColor','g','LineWidth',5,'Length',10)
+            arrow(coords_final(3,:),coords_final(4,:),'FaceColor','b','EdgeColor','b','LineWidth',5,'Length',10)
+            arrow(coords_final(5,:),coords_final(6,:),'FaceColor','r','EdgeColor','r','LineWidth',5,'Length',10)
+            legend(' Nodal Points',' AP Axis',' SI Axis',' ML Axis')
+            title(strcat('Coordinate System of'," ", char(FileName)),'Interpreter','none')
+            text(coords_final(2,1),coords_final(2,2),coords_final(2,3),'   Anterior','HorizontalAlignment','left','FontSize',15,'Color','g');
+            text(coords_final(4,1),coords_final(4,2),coords_final(4,3),'   Superior','HorizontalAlignment','left','FontSize',15,'Color','b');
+            if side_indx == 1
+                text(coords_final(6,1),coords_final(6,2),coords_final(6,3),'   Lateral','HorizontalAlignment','left','FontSize',15,'Color','r');
+            else
+                text(coords_final(6,1),coords_final(6,2),coords_final(6,3),'   Medial','HorizontalAlignment','left','FontSize',15,'Color','r');
+            end
+            grid off
+            axis off
+            xlabel('X')
+            ylabel('Y')
+            zlabel('Z')
+            axis equal
         end
-        hold on
-        arrow(coords_final(1,:),coords_final(2,:),'FaceColor','g','EdgeColor','g','LineWidth',5,'Length',10)
-        arrow(coords_final(3,:),coords_final(4,:),'FaceColor','b','EdgeColor','b','LineWidth',5,'Length',10)
-        arrow(coords_final(5,:),coords_final(6,:),'FaceColor','r','EdgeColor','r','LineWidth',5,'Length',10)
-        legend(' Nodal Points',' AP Axis',' SI Axis',' ML Axis')
-        title(strcat('Coordinate System of'," ", char(FileName)),'Interpreter','none')
-        text(coords_final(2,1),coords_final(2,2),coords_final(2,3),'   Anterior','HorizontalAlignment','left','FontSize',15,'Color','g');
-        text(coords_final(4,1),coords_final(4,2),coords_final(4,3),'   Superior','HorizontalAlignment','left','FontSize',15,'Color','b');
-        if side_indx == 1
-            text(coords_final(6,1),coords_final(6,2),coords_final(6,3),'   Lateral','HorizontalAlignment','left','FontSize',15,'Color','r');
-        else
-            text(coords_final(6,1),coords_final(6,2),coords_final(6,3),'   Medial','HorizontalAlignment','left','FontSize',15,'Color','r');
-        end
-        grid off
-        axis off
-        xlabel('X')
-        ylabel('Y')
-        zlabel('Z')
-        axis equal
-
         %% Save both coordinate systems to spreadsheet
         A = ["Subject"
             "Bone Model"
@@ -344,7 +353,7 @@ for m = 1:length(all_files)
             name = name(1:31);
         end
 
-        xlfilename = strcat(FolderPathName,'\CoordinateSystem_',FolderName,'.xlsx');
+        xlfilename = strcat(FolderPathName,'\CoordinateSystems','.xlsx');
         writematrix(A,xlfilename,'Sheet',name);
         writecell(B,xlfilename,'Sheet',name,'Range','B1');
         writematrix(C,xlfilename,'Sheet',name,'Range','A5');
@@ -377,3 +386,5 @@ for m = 1:length(all_files)
 
     end
 end
+
+
