@@ -253,8 +253,8 @@ fields = fieldnames(r);
 
 if better_start == 2
     field_name = fields{1};
-    [R_temp,T_temp,E_temp] = icp(nodes_template',nodes', iterations,'Matching','kDtree','EdgeRejection',logical(1),'Triangulation',con_temp);
-    [Rwr_temp,Twr_temp,Ewr_temp] = icp(nodes_template',nodes', iterations,'Matching','kDtree','WorstRejection',0.1);
+    [R_temp,T_temp,E_temp] = icp(nodes_template',nodes', iterations,'Matching','plane','kDtree','EdgeRejection',logical(1),'Triangulation',con_temp);
+    [Rwr_temp,Twr_temp,Ewr_temp] = icp(nodes_template',nodes', iterations,'Matching','plane','kDtree','WorstRejection',0.1);
     if E_temp(end) < Ewr_temp(end)
         R.(field_name) = R_temp;
         T.(field_name) = T_temp;
@@ -271,7 +271,7 @@ if better_start == 1
     for n = 1:numel(fields)
         rot = r.(fields{n}); % Access each rotation matrix using the field name
         rotnodes = nodes*rot; % Multiple nodes by rotation matrix
-        [~,~,error_temp] = icp(nodes_template',rotnodes', iterations_temp,'Matching','kDtree','EdgeRejection',logical(1),'Triangulation',con_temp); % Perform small ICP
+        [~,~,error_temp] = icp(nodes_template',rotnodes', iterations_temp,'Matching','plane','kDtree','EdgeRejection',logical(1),'Triangulation',con_temp); % Perform small ICP
         E_short.(fields{n}) = error_temp(end); % Save the lowest error
     end
 
@@ -291,8 +291,8 @@ if better_start == 1
         field_name = smallest_fields{i};  % Get the field name of the current rotation
         rot = r.(field_name);  % Access the corresponding rotation matrix
         rotnodes = nodes * rot;  % Multiply nodes by the rotation matrix
-        [R_temp,T_temp,E_temp] = icp(nodes_template',rotnodes', iterations,'Matching','kDtree','EdgeRejection',logical(1),'Triangulation',con_temp);
-        [Rwr_temp,Twr_temp,Ewr_temp] = icp(nodes_template',rotnodes', iterations,'Matching','kDtree','WorstRejection',0.1);
+        [R_temp,T_temp,E_temp] = icp(nodes_template',rotnodes', iterations,'Matching','plane','kDtree','EdgeRejection',logical(1),'Triangulation',con_temp);
+        [Rwr_temp,Twr_temp,Ewr_temp] = icp(nodes_template',rotnodes', iterations,'Matching','plane','kDtree','WorstRejection',0.1);
         if E_temp(end) < Ewr_temp(end)
             R.(field_name) = R_temp;
             T.(field_name) = T_temp;
@@ -327,7 +327,7 @@ iT = best_T;  % The best T vector
 %% Additional alignments and adjustments
 % This loop performs an alignment for the TT CS of the talus
 if bone_indx == 1 && bone_coord >= 2
-    [sR_talus,~,~] = icp(nodes_template2',nodes_template',25,'Matching','kDtree','EdgeRejection',logical(1),'Triangulation',con_temp);
+    [sR_talus,~,~] = icp(nodes_template2',nodes_template',25,'Matching','plane','kDtree','EdgeRejection',logical(1),'Triangulation',con_temp);
     aligned_nodes = (sR_talus*(aligned_nodes'))';
 else
     sR_talus = [];
@@ -364,12 +364,12 @@ if (tibfib_switch == 1 && bone_indx == 13) || (tibfib_switch == 1 && bone_indx =
     nodes_test3 = nodes_test1*rotz(180);
     nodes_test4 = nodes_test1*rotz(270);
 
-    [Rtw1,Ttw1,Etw1] = icp(nodes_template',nodes_test1', iterations,'Matching','kDtree','WorstRejection',0.1);
+    [Rtw1,Ttw1,Etw1] = icp(nodes_template',nodes_test1', iterations,'Matching','plane','kDtree','WorstRejection',0.1);
 
     if better_start == 1
-        [Rtw2,Ttw2,Etw2] = icp(nodes_template',nodes_test2', iterations,'Matching','kDtree','WorstRejection',0.1);
-        [Rtw3,Ttw3,Etw3] = icp(nodes_template',nodes_test3', iterations,'Matching','kDtree','WorstRejection',0.1);
-        [Rtw4,Ttw4,Etw4] = icp(nodes_template',nodes_test4', iterations,'Matching','kDtree','WorstRejection',0.1);
+        [Rtw2,Ttw2,Etw2] = icp(nodes_template',nodes_test2', iterations,'Matching','plane','kDtree','WorstRejection',0.1);
+        [Rtw3,Ttw3,Etw3] = icp(nodes_template',nodes_test3', iterations,'Matching','plane','kDtree','WorstRejection',0.1);
+        [Rtw4,Ttw4,Etw4] = icp(nodes_template',nodes_test4', iterations,'Matching','plane','kDtree','WorstRejection',0.1);
         Etw = min([Etw1(end),Etw2(end),Etw3(end),Etw4(end)]);
     else
         Etw = min([Etw1(end)]);
