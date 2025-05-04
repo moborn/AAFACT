@@ -220,8 +220,10 @@ for m = 1:length(all_files)
         % medial region is in the positive X direction.
         [nodes,cm_nodes] = center(nodes,1);
         better_start = 1;
-        [aligned_nodes, RTs] = icp_template(bone_indx, nodes, bone_coord(n), better_start);
-
+        %[aligned_nodes, RTs] = icp_template(bone_indx, nodes, bone_coord(n), better_start);
+        
+        [RTs, aligned_nodes, RMSE] = fitRigid(nodes, bone_indx, bone_coord(n));
+        
         %% Performs coordinate system calculation
         [Temp_Coordinates, Temp_Nodes] = CoordinateSystem(aligned_nodes, bone_indx, bone_coord(n),side_indx);
 
@@ -236,10 +238,13 @@ for m = 1:length(all_files)
         Temp_Nodes_Coords = [Temp_Nodes; Temp_Coordinates];
 
         %% Reorient and Translate to Original Input Origin and Orientation
-        [nodes_final, coords_final, coords_final_unit, Temp_Coordinates_Unit] = reorient(Temp_Nodes_Coords, cm_nodes, side_indx, RTs);
+        %[nodes_final, coords_final, coords_final_unit, Temp_Coordinates_Unit] = reorient(Temp_Nodes_Coords, cm_nodes, side_indx, RTs);
+        [nodes_final,coords_final, coords_final_unit, Temp_Coordinates_Unit] = reorientRigid(Temp_Nodes_Coords, cm_nodes, side_indx, RTs);
 
         if bone_indx == 1 && bone_coord(n) == 3 % Additional alignment for talus subtalar ACS
-            [aligned_nodes_TST, RTs_TST] = icp_template(bone_indx, nodes, 1, better_start);
+            %[aligned_nodes_TST, RTs_TST] = icp_template(bone_indx, nodes, 1, better_start);
+            [RTs_TST, aligned_nodes_TST, RMSE] = fitRigid(nodes, bone_indx, bone_coord(n));
+
             [Temp_Coordinates_TST, Temp_Nodes_TST] = CoordinateSystem(aligned_nodes_TST, bone_indx, 1, side_indx);
 
             if joint_indx > 1
@@ -250,8 +255,8 @@ for m = 1:length(all_files)
 
             Temp_Nodes_Coords_TST = [Temp_Nodes_TST; Temp_Coordinates_TST];
 
-            [~, coords_final_TST, coords_final_unit_TST, Temp_Coordinates_Unit_TST] = reorient(Temp_Nodes_Coords_TST, cm_nodes, side_indx, RTs_TST);
-
+            %[~, coords_final_TST, coords_final_unit_TST, Temp_Coordinates_Unit_TST] = reorient(Temp_Nodes_Coords_TST, cm_nodes, side_indx, RTs_TST);
+            [~,coords_final_TST, coords_final_unit_TST, Temp_Coordinates_Unit_TST] = reorientRigid(Temp_Nodes_Coords_TST, cm_nodes, side_indx, RTs_TST);
             coords_final = [coords_final(1,:); ((coords_final_TST(2,:) + coords_final(2,:)).'/2)'
                 coords_final(3,:); ((coords_final_TST(4,:) + coords_final(4,:)).'/2)'
                 coords_final(5,:); ((coords_final_TST(6,:) + coords_final(6,:)).'/2)'];
@@ -376,7 +381,7 @@ for m = 1:length(all_files)
                 'Coordinate System','Options',{'Yes','No'},'DefaultOption',1);
             delete(fig2)
             if accurate_answer == "No"
-                RTss = better_starting_point(accurate_answer,nodes,bone_indx,bone_coord(n),side_indx,FileName,name,list_bone,list_side,FolderPathName,FolderName,cm_nodes,nodes_original,joint_indx,conlist,ext);
+                RTs = better_starting_point(accurate_answer,nodes,bone_indx,bone_coord(n),side_indx,FileName,name,list_bone,list_side,FolderPathName,FolderName,cm_nodes,nodes_original,joint_indx,conlist,ext);
             end
         end
 
