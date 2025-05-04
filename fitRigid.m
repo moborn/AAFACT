@@ -55,6 +55,7 @@ function [x_opt, data_fitted, rms_vals] = fitRigid(data, bone_indx, bone_coord, 
     elseif bone_indx == 5
         TR_template = stlread('Medial_Cuneiform_Template.stl');
         a = 3;
+        
     elseif bone_indx == 6
         TR_template = stlread('Intermediate_Cuneiform_Template.stl');
         a = 3;
@@ -92,13 +93,25 @@ function [x_opt, data_fitted, rms_vals] = fitRigid(data, bone_indx, bone_coord, 
     target = TR_template.Points;
     % Sample data if required
     if ~isempty(opts.sample)
-        D = sampleData(data, opts.sample);
-        T = sampleData(target, opts.sample);
+        if size(data, 1) || size(target,1) <= opts.sample
+            %%determine which is larger, data or target
+            if size(data, 1) > size(target, 1)
+                D = sampleData(data, size(target, 1));
+                T = sampleData(target, size(target, 1));
+            else
+                T = sampleData(target, size(data, 1));
+                D = sampleData(data, size(data, 1));
+            end
+        else
+            D = sampleData(data, opts.sample);
+            T = sampleData(target, opts.sample);
+        end
     else
         D = data;
         T = target;
     end
-    
+    % fprintf('Sampled data size: %d\n', size(D, 1));
+    % fprintf('Sampled target size: %d\n', size(T, 1));
     % Initial guess
     if isempty(opts.t0)
         t0 = zeros(1,6);
