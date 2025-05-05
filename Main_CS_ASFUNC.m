@@ -221,8 +221,12 @@ for m = 1:length(all_files)
         [nodes,cm_nodes] = center(nodes,1);
         better_start = 1;
         %[aligned_nodes, RTs] = icp_template(bone_indx, nodes, bone_coord(n), better_start);
-        
-        [RTs, aligned_nodes, RMSE] = fitRigid(nodes, bone_indx, bone_coord(n));
+        if mesh_list == 0
+            [RTs, aligned_nodes, RMSE] = fitRigid(nodes, bone_indx, bone_coord(n));
+            t0 = RTs;
+        else
+            [RTs, aligned_nodes, RMSE] = fitRigid(nodes, bone_indx, bone_coord(n), 't0', t0);
+        end
         
         %% Performs coordinate system calculation
         [Temp_Coordinates, Temp_Nodes] = CoordinateSystem(aligned_nodes, bone_indx, bone_coord(n),side_indx);
@@ -243,7 +247,13 @@ for m = 1:length(all_files)
 
         if bone_indx == 1 && bone_coord(n) == 3 % Additional alignment for talus subtalar ACS
             %[aligned_nodes_TST, RTs_TST] = icp_template(bone_indx, nodes, 1, better_start);
-            [RTs_TST, aligned_nodes_TST, RMSE] = fitRigid(nodes, bone_indx, bone_coord(n));
+            if mesh_list == 0
+                [RTs_TST, aligned_nodes_TST, RMSE] = fitRigid(nodes, bone_indx, 1);
+                t0_TST = RTs_TST;
+            else
+                [RTs_TST, aligned_nodes_TST, RMSE] = fitRigid(nodes, bone_indx, 1, 't0', t0_TST);
+            end
+            % [RTs_TST, aligned_nodes_TST, RMSE] = fitRigid(nodes, bone_indx, bone_coord(n));
 
             [Temp_Coordinates_TST, Temp_Nodes_TST] = CoordinateSystem(aligned_nodes_TST, bone_indx, 1, side_indx);
 
