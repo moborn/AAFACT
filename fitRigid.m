@@ -29,7 +29,7 @@ function [x_opt, data_fitted, rms_vals] = fitRigid(data, bone_indx, bone_coord, 
     addParameter(p, 'output_errors', false);
     parse(p, varargin{:});
     opts = p.Results;
-
+    scalefactor = 1;
     addpath('AAFACT_utils\Template_Bones\')
     %% Read in Template Bone
     if bone_indx == 1 && bone_coord == 1 % TN
@@ -64,18 +64,64 @@ function [x_opt, data_fitted, rms_vals] = fitRigid(data, bone_indx, bone_coord, 
         a = 3;
     elseif bone_indx == 8
         TR_template = stlread('Metatarsal1_Template.stl');
+        tempdata = double(full(data));    
+        shp = alphaShape(tempdata);
+        % shp = alphaShape(pts, alpha);      % Create alpha shape
+        inputvol = volume(shp); 
+                % Compute volume
+        tempdata = double(full(TR_template.Points));
+        shp = alphaShape(tempdata);
+        targetvol = volume(shp); 
+        scalefactor = inputvol/targetvol;
         a = 2;
     elseif bone_indx == 9
         TR_template = stlread('Metatarsal2_Template.stl');
+        tempdata = double(full(data));    
+        shp = alphaShape(tempdata);
+        % shp = alphaShape(pts, alpha);      % Create alpha shape
+        inputvol = volume(shp); 
+                % Compute volume
+        tempdata = double(full(TR_template.Points));
+        shp = alphaShape(tempdata);
+        targetvol = volume(shp); 
+        scalefactor = inputvol/targetvol;
         a = 2;
     elseif bone_indx == 10
         TR_template = stlread('Metatarsal3_Template.stl');
+        tempdata = double(full(data));    
+        shp = alphaShape(tempdata);
+        % shp = alphaShape(pts, alpha);      % Create alpha shape
+        inputvol = volume(shp); 
+                % Compute volume
+        tempdata = double(full(TR_template.Points));
+        shp = alphaShape(tempdata);
+        targetvol = volume(shp); 
+        scalefactor = inputvol/targetvol;
         a = 2;
     elseif bone_indx == 11
         TR_template = stlread('Metatarsal4_Template.stl');
+        tempdata = double(full(data));    
+        shp = alphaShape(tempdata);
+        % shp = alphaShape(pts, alpha);      % Create alpha shape
+        inputvol = volume(shp); 
+                % Compute volume
+        tempdata = double(full(TR_template.Points));
+        shp = alphaShape(tempdata);
+        targetvol = volume(shp); 
+        scalefactor = inputvol/targetvol;
         a = 2;
     elseif bone_indx == 12
         TR_template = stlread('Metatarsal5_Template.stl');
+        tempdata = double(full(data));    
+        shp = alphaShape(tempdata);
+        % shp = alphaShape(pts, alpha);      % Create alpha shape
+        inputvol = volume(shp); 
+                % Compute volume
+        tempdata = double(full(TR_template.Points));
+        shp = alphaShape(tempdata);
+        targetvol = volume(shp); 
+                % Compute volume
+        scalefactor = inputvol/targetvol;
         a = 2;
     elseif bone_indx == 13 && bone_coord == 1
         TR_template = stlread('Tibia_Template.stl');
@@ -91,6 +137,7 @@ function [x_opt, data_fitted, rms_vals] = fitRigid(data, bone_indx, bone_coord, 
         a = 3;
     end
     target = TR_template.Points;
+    target = target*scalefactor; % Scale to match data
     % Sample data if required
     if ~isempty(opts.sample)
         if size(data, 1) || size(target,1) <= opts.sample
@@ -147,7 +194,7 @@ function [x_opt, data_fitted, rms_vals] = fitRigid(data, bone_indx, bone_coord, 
             opts.maxfev = 0;
         end
         options = optimset('TolX', opts.xtol, 'MaxFunEvals', opts.maxfev, 'Display', 'off');
-        [x_opt, ~] = lsqnonlin(obj, t0, [], [], options);
+        [x_opt,resnorm,residual,exitflag,output] = lsqnonlin(obj, t0, [], [], options);
     else
         options = optimset('TolX', opts.xtol, 'MaxIter', opts.maxfev, ...
                            'MaxFunEvals', opts.maxfun, 'Display', logical2disp(opts.verbose));
@@ -158,6 +205,7 @@ function [x_opt, data_fitted, rms_vals] = fitRigid(data, bone_indx, bone_coord, 
     
     if opts.verbose
         fprintf('Final RMS: %.6f\n', rms_opt);
+        fprintf('Exit flag: %d\n', exitflag);
     end
     
     data_fitted = transformRigid3DAboutP(data, x_opt, rotcentre);

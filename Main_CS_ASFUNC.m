@@ -221,24 +221,25 @@ for m = 1:length(all_files)
         [nodes,cm_nodes] = center(nodes,1);
         better_start = 1;
         %[aligned_nodes, RTs] = icp_template(bone_indx, nodes, bone_coord(n), better_start);
-        if m ~= 0
-            [RTs, aligned_nodes, RMSE] = fitRigid(nodes, bone_indx, bone_coord(n));
+        if m == 1
+            [RTs, aligned_nodes, RMSE] = fitRigid(nodes, bone_indx, bone_coord(n), 'verbose', true, 'maxfev', 5000, 'xtol', 1e-6);
+            % , 'maxfev', 5000, 'xtol', 1e-9
             t0 = RTs;
-            if bone_indx >= 8 && bone_indx <= 12
-                [icp_nodes, icpRTs] = icp_template(bone_indx, aligned_nodes, bone_coord(n), better_start);
-                % [icpRTs, icp_nodes, RMSE] = fitRigid(aligned_nodes, bone_indx, bone_coord(n), 'xtol', 1e-9, 'maxfev', 1000);
-                [icp_nodes, cm_icp] = center(icp_nodes,1);
-            end
+            % if bone_indx >= 8 && bone_indx <= 12
+            %     [icp_nodes, icpRTs] = icp_template(bone_indx, aligned_nodes, bone_coord(n), better_start);
+            %     % [icpRTs, icp_nodes, RMSE] = fitRigid(aligned_nodes, bone_indx, bone_coord(n), 'xtol', 1e-9, 'maxfev', 1000);
+            %     [icp_nodes, cm_icp] = center(icp_nodes,1);
+            % end
         else
-            [RTs, aligned_nodes, RMSE] = fitRigid(nodes, bone_indx, bone_coord(n), 't0', t0);
+            [RTs, aligned_nodes, RMSE] = fitRigid(nodes, bone_indx, bone_coord(n), 't0', t0, 'verbose', true, 'maxfev', 5000, 'xtol', 1e-9);
         end
         
         %% Performs coordinate system calculation
-        if bone_indx >= 8 && bone_indx <= 12
-            [Temp_Coordinates, Temp_Nodes] = CoordinateSystem(icp_nodes, bone_indx, bone_coord(n),side_indx);
-        else
-            [Temp_Coordinates, Temp_Nodes] = CoordinateSystem(aligned_nodes, bone_indx, bone_coord(n),side_indx);
-        end
+        % if bone_indx >= 8 && bone_indx <= 12
+            % [Temp_Coordinates, Temp_Nodes] = CoordinateSystem(icp_nodes, bone_indx, bone_coord(n),side_indx);
+        % else
+        [Temp_Coordinates, Temp_Nodes] = CoordinateSystem(aligned_nodes, bone_indx, bone_coord(n),side_indx);
+        % end
         %% Joint Origin
         if joint_indx > 1
             [Temp_Coordinates, Joint] = JointOrigin(Temp_Coordinates, Temp_Nodes, conlist, bone_indx, joint_indx, side_indx);
@@ -250,16 +251,16 @@ for m = 1:length(all_files)
         Temp_Nodes_Coords = [Temp_Nodes; Temp_Coordinates];
 
         %% Reorient and Translate to Original Input Origin and Orientation
-        if bone_indx >= 8 && bone_indx <= 12
-            [nodes_final_icp, coords_final_icp, coords_final_unit_icp, Temp_Coordinates_Unit_icp] = reorient(Temp_Nodes_Coords, cm_icp, side_indx, icpRTs);
-            % [nodes_final_icp,coords_final_icp, coords_final_unit_icp, Temp_Coordinates_Unit_icp] = reorientRigid(Temp_Nodes_Coords, cm_icp, side_indx, icpRTs);
-            nodes_final_icp = [nodes_final_icp; coords_final_icp];
-            [nodes_final,coords_final, coords_final_unit, Temp_Coordinates_Unit] = reorientRigid(nodes_final_icp, cm_nodes, side_indx, RTs);
-            % clear nodes_final_icp coords_final_icp coords_final_unit_icp Temp_Coordinates_Unit_icp
-        else
+        % if bone_indx >= 8 && bone_indx <= 12
+        %     [nodes_final_icp, coords_final_icp, coords_final_unit_icp, Temp_Coordinates_Unit_icp] = reorient(Temp_Nodes_Coords, cm_icp, side_indx, icpRTs);
+        %     % [nodes_final_icp,coords_final_icp, coords_final_unit_icp, Temp_Coordinates_Unit_icp] = reorientRigid(Temp_Nodes_Coords, cm_icp, side_indx, icpRTs);
+        %     nodes_final_icp = [nodes_final_icp; coords_final_icp];
+        %     [nodes_final,coords_final, coords_final_unit, Temp_Coordinates_Unit] = reorientRigid(nodes_final_icp, cm_nodes, side_indx, RTs);
+        %     clear nodes_final_icp coords_final_icp coords_final_unit_icp Temp_Coordinates_Unit_icp
+        % else
         % [nodes_final, coords_final, coords_final_unit, Temp_Coordinates_Unit] = reorient(Temp_Nodes_Coords, cm_nodes, side_indx, RTs);
-            [nodes_final,coords_final, coords_final_unit, Temp_Coordinates_Unit] = reorientRigid(Temp_Nodes_Coords, cm_nodes, side_indx, RTs);
-        end
+        [nodes_final,coords_final, coords_final_unit, Temp_Coordinates_Unit] = reorientRigid(Temp_Nodes_Coords, cm_nodes, side_indx, RTs);
+        % end
 
         if bone_indx == 1 && bone_coord(n) == 3 % Additional alignment for talus subtalar ACS
             %[aligned_nodes_TST, RTs_TST] = icp_template(bone_indx, nodes, 1, better_start);
